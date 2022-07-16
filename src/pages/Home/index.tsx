@@ -81,6 +81,12 @@ export function Home() {
     }
   }, [activeCycle])
 
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}:${seconds} - Time to focus!`
+    }
+  }, [minutes, seconds, activeCycle])
+
   return (
     <C.HomeContainer>
       <form onSubmit={handleSubmit(handleCreateNewCycle)}>
