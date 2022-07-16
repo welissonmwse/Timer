@@ -1,5 +1,5 @@
 import * as C from './styles'
-import { Play } from 'phosphor-react'
+import { HandPalm, Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { v4 as uuidv4 } from 'uuid'
@@ -22,6 +22,7 @@ interface Cycle {
   task: string
   minutesAmount: number
   startDate: Date
+  interruptedDate?: Date
 }
 
 export function Home() {
@@ -66,6 +67,19 @@ export function Home() {
   const task = watch('task')
   const isSubmitDisaled = !task
 
+  function handleInterruptCycle() {
+    setCycles(
+      cycles.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interruptedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+    setActiveCycleId(null)
+  }
+
   useEffect(() => {
     let interval: number
     if (activeCycle) {
@@ -95,6 +109,7 @@ export function Home() {
           <C.TaskInput
             type="text"
             id="task"
+            disabled={!!activeCycle}
             list="task-suggestions"
             placeholder="Dê um nome ao seu projeto"
             {...register('task')}
@@ -110,6 +125,7 @@ export function Home() {
           <C.MinutesAmountInput
             type="number"
             id="minutesAmount"
+            disabled={!!activeCycle}
             placeholder="00"
             step={5}
             min={5}
@@ -127,10 +143,17 @@ export function Home() {
           <span>{seconds[0]}</span>
           <span>{seconds[1]}</span>
         </C.CountdownContainer>
-        <C.StartCountdownButton type="submit" disabled={isSubmitDisaled}>
-          <Play size={24} />
-          Começar
-        </C.StartCountdownButton>
+        {activeCycle ? (
+          <C.StopCountdownButton type="button" onClick={handleInterruptCycle}>
+            <HandPalm size={24} />
+            Interromper
+          </C.StopCountdownButton>
+        ) : (
+          <C.StartCountdownButton type="submit" disabled={isSubmitDisaled}>
+            <Play size={24} />
+            Começar
+          </C.StartCountdownButton>
+        )}
       </form>
     </C.HomeContainer>
   )
