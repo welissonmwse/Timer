@@ -1,11 +1,10 @@
 import * as C from './styles'
 import { HandPalm, Play } from 'phosphor-react'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { v4 as uuidv4 } from 'uuid'
 import * as zod from 'zod'
-import { createContext, useEffect, useState } from 'react'
-import { differenceInSeconds } from 'date-fns'
+import { createContext, useState } from 'react'
 import { NewCycleForm } from './components/NewCycleForm'
 import { Countdown } from './components/Countdown'
 
@@ -54,13 +53,15 @@ export function Home() {
     )
   }
 
-  const { register, handleSubmit, watch, reset } = useForm({
+  const newCycleForm = useForm({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues: {
       task: '',
       minutesAmount: 0,
     },
   })
+
+  const { handleSubmit, watch, reset } = newCycleForm
 
   function handleCreateNewCycle(data: NewCycleFormData) {
     const id = uuidv4()
@@ -100,8 +101,11 @@ export function Home() {
           value={{ activeCycle, activeCycleId, markCurrentCycleAsFineshed }}
         >
           <NewCycleForm />
-          <Countdown />
+          <FormProvider {...newCycleForm}>
+            <Countdown />
+          </FormProvider>
         </CyclesContext.Provider>
+
         {activeCycle ? (
           <C.StopCountdownButton type="button" onClick={handleInterruptCycle}>
             <HandPalm size={24} />
